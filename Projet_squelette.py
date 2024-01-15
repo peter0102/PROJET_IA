@@ -35,7 +35,7 @@ def alpha_beta_decision(board, turn, ai_level, queue, max_player):
 
 def minimax(board, turn, player, depth, isMaximizingPlayer, alpha, beta):
     if depth == 0 or board.check_victory():
-        return board.eval(player)
+        return board.eval(player, turn)
     if (isMaximizingPlayer):
         value = -np.inf
         moves = board.get_possible_moves()
@@ -66,85 +66,106 @@ class Board: #plus de valeur à la défense qu'à l'attaque
                      [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
 
 
-    def eval(self, player):
+    def eval(self, player, turn):
         score = 0
-        for columns in self.grid: #on regarde les colonnes (2,3,4 jetons consécutifs)
+        if turn < 7:
+                for columns in self.grid: #on regarde les colonnes (2,3,4 jetons consécutifs)
+                    for i in range(5):
+                        if columns[i] == columns[i+1] == player:
+                            score += 5 #ia = 2 si l'ia joue en tour 2
+                        if columns[i] == columns[i+1] == player % 2 + 1:
+                            score -= 10 #player = 1
+                for columns in self.grid:
+                    for i in range(4):
+                        if columns[i] == columns[i+1] == columns[i+2] == player:
+                            score += 10
+                        if columns[i] == columns[i+1] == columns[i+2] == player % 2 + 1:
+                            score -= 20    
+                for columns in self.grid:
+                    for i in range(3):
+                        if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player:
+                            score += 100
+                        if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player % 2 + 1:
+                            score -= 200
+                return score
+        else:
+            for columns in self.grid: #on regarde les colonnes (2,3,4 jetons consécutifs)
+                for i in range(5):
+                    if columns[i] == columns[i+1] == player:
+                        score += 5 #ia = 2 si l'ia joue en tour 2
+                    if columns[i] == columns[i+1] == player % 2 + 1:
+                        score -= 10 #player = 1
+            for columns in self.grid:
+                for i in range(4):
+                    if columns[i] == columns[i+1] == columns[i+2] == player:
+                        score += 10
+                    if columns[i] == columns[i+1] == columns[i+2] == player % 2 + 1:
+                        score -= 20    
+            for columns in self.grid:
+                for i in range(3):
+                    if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player:
+                        score += 100
+                    if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player % 2 + 1:
+                        score -= 200
+
+            for i in range(6): #on regarde les lignes (2,3,4 jetons consécutifs)
+                for j in range(6):
+                    if self.grid[i][j] == self.grid[i+1][j] == player:
+                        score += 5
+                    if self.grid[i][j] == self.grid[i+1][j] == player % 2 + 1:
+                        score -= 20
             for i in range(5):
-                if columns[i] == columns[i+1] == player:
-                    score += 5 #ia = 2 si l'ia joue en tour 2
-                if columns[i] == columns[i+1] == player % 2 + 1:
-                    score -= 10 #player = 1
-        for columns in self.grid:
+                for j in range(6):
+                    if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == player:
+                        score += 10
+                    if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == player % 2 + 1:
+                        score -= 30
             for i in range(4):
-                if columns[i] == columns[i+1] == columns[i+2] == player:
-                    score += 10
-                if columns[i] == columns[i+1] == columns[i+2] == player % 2 + 1:
-                    score -= 20    
-        for columns in self.grid:
-            for i in range(3):
-                if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player:
-                    score += 100
-                if columns[i] == columns[i+1] == columns[i+2] == columns[i+3] == player % 2 + 1:
-                    score -= 200
+                for j in range(6):
+                    if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == self.grid[i+3][j] == player:
+                        score += 100
+                    if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == self.grid[i+3][j] == player % 2 + 1:
+                        score -= 300
 
-        for i in range(6): #on regarde les lignes (2,3,4 jetons consécutifs)
-            for j in range(6):
-                if self.grid[i][j] == self.grid[i+1][j] == player:
-                    score += 5
-                if self.grid[i][j] == self.grid[i+1][j] == player % 2 + 1:
-                    score -= 20
-        for i in range(5):
-            for j in range(6):
-                if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == player:
-                    score += 10
-                if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == player % 2 + 1:
-                    score -= 30
-        for i in range(4):
-            for j in range(6):
-                if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == self.grid[i+3][j] == player:
-                    score += 100
-                if self.grid[i][j] == self.grid[i+1][j] == self.grid[i+2][j] == self.grid[i+3][j] == player % 2 + 1:
-                    score -= 300
-
-        for horizontal_shift in range(6): #on regarde les diagonales montantes et descendantes (2,3,4 jetons consécutifs)
-            for vertical_shift in range(5):
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] == player:
-                    score += 5
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] == player % 2 + 1:
-                    score -= 10
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] == player:
-                    score += 5
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] == player % 2 + 1:
-                    score -= 10
-        for horizontal_shift in range(5):
-            for vertical_shift in range(4):
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
-                    self.grid[horizontal_shift + 2][vertical_shift + 2] == player:
-                    score += 10
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
-                    self.grid[horizontal_shift + 2][vertical_shift + 2] == player % 2 + 1:
-                    score -= 30
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
-                    self.grid[horizontal_shift + 2][3 - vertical_shift] == player:
-                    score += 10
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
-                    self.grid[horizontal_shift + 2][3 - vertical_shift] == player % 2 + 1:
-                    score -= 30
-        for horizontal_shift in range(4):
-            for vertical_shift in range(3):
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
-                    self.grid[horizontal_shift + 2][vertical_shift + 2] == self.grid[horizontal_shift + 3][vertical_shift + 3] == player:
-                    score += 100
-                if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
-                    self.grid[horizontal_shift + 2][vertical_shift + 2] == self.grid[horizontal_shift + 3][vertical_shift + 3] == player % 2 + 1:
-                    score -= 200
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
-                    self.grid[horizontal_shift + 2][3 - vertical_shift] == self.grid[horizontal_shift + 3][2 - vertical_shift] == player:
-                    score += 100
-                if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
-                    self.grid[horizontal_shift + 2][3 - vertical_shift] == self.grid[horizontal_shift + 3][2 - vertical_shift] == player % 2 + 1:
-                    score -= 200                
-        return score
+            for horizontal_shift in range(6): #on regarde les diagonales montantes et descendantes (2,3,4 jetons consécutifs)
+                for vertical_shift in range(5):
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] == player:
+                        score += 5
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] == player % 2 + 1:
+                        score -= 10
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] == player:
+                        score += 5
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] == player % 2 + 1:
+                        score -= 10
+            for horizontal_shift in range(5):
+                for vertical_shift in range(4):
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
+                        self.grid[horizontal_shift + 2][vertical_shift + 2] == player:
+                        score += 10
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
+                        self.grid[horizontal_shift + 2][vertical_shift + 2] == player % 2 + 1:
+                        score -= 30
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
+                        self.grid[horizontal_shift + 2][3 - vertical_shift] == player:
+                        score += 10
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
+                        self.grid[horizontal_shift + 2][3 - vertical_shift] == player % 2 + 1:
+                        score -= 30
+            for horizontal_shift in range(4):
+                for vertical_shift in range(3):
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
+                        self.grid[horizontal_shift + 2][vertical_shift + 2] == self.grid[horizontal_shift + 3][vertical_shift + 3] == player:
+                        score += 100
+                    if self.grid[horizontal_shift][vertical_shift] == self.grid[horizontal_shift + 1][vertical_shift + 1] ==\
+                        self.grid[horizontal_shift + 2][vertical_shift + 2] == self.grid[horizontal_shift + 3][vertical_shift + 3] == player % 2 + 1:
+                        score -= 200
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
+                        self.grid[horizontal_shift + 2][3 - vertical_shift] == self.grid[horizontal_shift + 3][2 - vertical_shift] == player:
+                        score += 100
+                    if self.grid[horizontal_shift][5 - vertical_shift] == self.grid[horizontal_shift + 1][4 - vertical_shift] ==\
+                        self.grid[horizontal_shift + 2][3 - vertical_shift] == self.grid[horizontal_shift + 3][2 - vertical_shift] == player % 2 + 1:
+                        score -= 200                
+            return score
         
     def copy(self):
         new_board = Board()
